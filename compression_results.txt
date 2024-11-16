@@ -1,4 +1,5 @@
 ==== Compression Report ====
+Entropy: 4.2570 bits
 
 Symbol Probabilities:
   'i': 0.0605
