@@ -61,6 +61,35 @@ def huffman_encode(text, codes):
     return ''.join(codes[char] for char in text)
 
 
+# Implements Shannon-Fano encoding
+def shannon_fano_encode(probabilities):
+    sorted_probs = sorted(probabilities.items(), key=lambda x: x[1], reverse=True)
+    codes = {}
+
+    def partition(symbols):
+        total_prob = sum(prob for _, prob in symbols)
+        cumulative_prob = 0
+        min_diff = float('inf')
+        split_index = 0
+        for i, (_, prob) in enumerate(symbols):
+            cumulative_prob += prob
+            diff = abs(total_prob / 2 - cumulative_prob)
+            if diff < min_diff:
+                min_diff = diff
+                split_index = i + 1
+        return symbols[:split_index], symbols[split_index:]
+
+    def recursive_partition(symbols, prefix=""):
+        if len(symbols) == 1:
+            codes[symbols[0][0]] = prefix
+        else:
+            left, right = partition(symbols)
+            recursive_partition(left, prefix + "0")
+            recursive_partition(right, prefix + "1")
+
+    recursive_partition(sorted_probs)
+    return codes
+
 #_____________________________________________________________________________________________________#
 
 # Main function to perform compression and generate report
@@ -76,12 +105,15 @@ def perform_compression(file_path):
 
     huffman_efficiency = (entropy / sum(len(huffman_codes[char]) * prob for char, prob in probabilities.items())) * 100
 
+    shannon_fano_codes = shannon_fano_encode(probabilities)
+    shannon_fano_efficiency = (entropy / sum(len(shannon_fano_codes[char]) * prob for char, prob in probabilities.items())) * 100
     
-    with open('C:/Users/ASUS/Documents/compression_results.txt', 'w') as result_file:
+    with open('/Users/yousefsaeed/Documents/GitHub/Entropy_Compression_Coding_Algorithms/compression_results.txt', 'w') as result_file:
         result_file.write("==== Compression Report ====\n")
         result_file.write(f"Entropy: {entropy:.4f} bits\n")
         result_file.write(f"Fixed Length Encoding - Bits per Symbol: {fixed_bits}, Efficiency: {fixed_efficiency:.2f}%\n")
         result_file.write(f"Huffman Encoding - Efficiency: {huffman_efficiency:.2f}%\n")
+        result_file.write(f"Shannon-Fano Encoding - Efficiency: {shannon_fano_efficiency:.2f}%\n")
 
 
         result_file.write("\nSymbol Probabilities:\n")
@@ -94,5 +126,9 @@ def perform_compression(file_path):
             result_file.write(f"  '{char}': {code}\n")
 
 
-file_path = 'C:/Users/ASUS/Documents/Test_text_file.txt'
+        result_file.write("\nShannon-Fano Encoding Codes:\n")
+        for char, code in shannon_fano_codes.items():
+            result_file.write(f"  '{char}': {code}\n")
+            
+file_path = '/Users/yousefsaeed/Documents/GitHub/Entropy_Compression_Coding_Algorithms/Test_text_file.txt'
 perform_compression(file_path)
