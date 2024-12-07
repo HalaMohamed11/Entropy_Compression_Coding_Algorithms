@@ -56,9 +56,26 @@ def generate_huffman_codes(node):
     
     return codes
 
+
 # Encodes text using Huffman codes
 def huffman_encode(text, codes):
     return ''.join(codes[char] for char in text)
+
+
+# Decodes Huffman-encoded text
+def huffman_decode(encoded_text, codes):
+    reverse_codes = {v: k for k, v in codes.items()}
+    
+    current_code = ""
+    decoded_text = []
+
+    for bit in encoded_text:
+        current_code += bit
+        if current_code in reverse_codes:
+            decoded_text.append(reverse_codes[current_code])
+            current_code = ""
+
+    return ''.join(decoded_text)
 
 
 # Implements Shannon-Fano encoding
@@ -102,13 +119,14 @@ def perform_compression(file_path):
     huffman_tree_root = create_huffman_tree(probabilities)
     huffman_codes = generate_huffman_codes(huffman_tree_root)
     huffman_encoded = huffman_encode(text, huffman_codes)
+    huffman_decoded = huffman_decode(huffman_encoded, huffman_codes)
 
     huffman_efficiency = (entropy / sum(len(huffman_codes[char]) * prob for char, prob in probabilities.items())) * 100
 
     shannon_fano_codes = shannon_fano_encode(probabilities)
     shannon_fano_efficiency = (entropy / sum(len(shannon_fano_codes[char]) * prob for char, prob in probabilities.items())) * 100
     
-    with open('/Users/yousefsaeed/Documents/GitHub/Entropy_Compression_Coding_Algorithms/compression_results.txt', 'w') as result_file:
+    with open('C:\Users\ATD\OneDrive\Desktop\ggit\Entropy_Compression_Coding_Algorithms/compression_results.txt', 'w') as result_file:
         result_file.write("==== Compression Report ====\n")
         result_file.write(f"Entropy: {entropy:.4f} bits\n")
         result_file.write(f"Fixed Length Encoding - Bits per Symbol: {fixed_bits}, Efficiency: {fixed_efficiency:.2f}%\n")
@@ -130,5 +148,5 @@ def perform_compression(file_path):
         for char, code in shannon_fano_codes.items():
             result_file.write(f"  '{char}': {code}\n")
             
-file_path = '/Users/yousefsaeed/Documents/GitHub/Entropy_Compression_Coding_Algorithms/Test_text_file.txt'
+file_path = 'C:\Users\ATD\OneDrive\Desktop\ggit\Entropy_Compression_Coding_Algorithms/Test_text_file.txt'
 perform_compression(file_path)
